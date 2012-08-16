@@ -2,9 +2,9 @@ MediaTomb - UPnP MediaServer
 
 This documentation is valid for MediaTomb version 0.12.0.
 
-Copyright   2005 Gena Batsyan, Sergey Bostandzhyan
+Copyright 2005 Gena Batsyan, Sergey Bostandzhyan
 
-Copyright   2006-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
+Copyright 2006-2008 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer
 
 THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!
 
@@ -61,7 +61,6 @@ Table of Contents
 9. Legal
 
     9.1. Copyright
-    9.2. License
 
 10. Acknowledgments
 11. Contributions
@@ -3651,18 +3650,6 @@ Gena Batyan <bgeradz at mediatomb dot cc>
 Sergey Bostandzhyan <jin at mediatomb dot cc>
 
 Leonhard Wimmer <leo at mediatomb dot cc>
-
-9.2. License
-
-MediaTomb is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 2 as published by the Free
-Software Foundation. MediaTomb is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
-License for more details. You should have received a copy of the GNU General
-Public License version 2 along with MediaTomb; if not, write to the Free
-Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,
-USA.
 
 10. Acknowledgments
 
