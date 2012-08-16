@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$
+    $Id: weborama_service.cc 2080 2010-03-23 19:18:33Z lww $
 */
 
 /// \file weborama_service.cc
@@ -552,11 +552,11 @@ bool WeboramaService::refreshServiceData(Ref<Layout> layout)
             log_debug("Updating existing Weborama object\n");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
-            struct timespec oldt, newt;
-            oldt.tv_nsec = 0;
-            oldt.tv_sec = old->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
-            newt.tv_nsec = 0;
-            newt.tv_sec = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+//            struct timespec oldt, newt;
+//            oldt.tv_nsec = 0;
+//            oldt.tv_sec = old->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+//            newt.tv_nsec = 0;
+//            newt.tv_sec = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
             ContentManager::getInstance()->updateObject(obj);
         }
 
