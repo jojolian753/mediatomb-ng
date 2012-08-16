@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$
+    $Id: object.h 2080 2010-03-23 19:18:33Z lww $
 */
 
 /// \file object.h
@@ -32,7 +32,7 @@
 #ifndef __ZMM_OBJECT_H__
 #define __ZMM_OBJECT_H__
 
-#include <new> // for size_t
+#include <cstddef> // for size_t
 #include "atomic.h"
 
 namespace zmm
@@ -48,8 +48,8 @@ public:
     void release();
     int getRefCount();
 
-    static void* operator new (size_t size); 
-    static void operator delete (void *ptr);
+    static void* operator new(std::size_t size);
+    static void operator delete(void *ptr);
 protected:
     mt_atomic_t _ref_count;
 #ifdef ATOMIC_NEED_MUTEX
