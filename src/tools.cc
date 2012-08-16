@@ -24,7 +24,7 @@
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
     
-    $Id$
+    $Id: tools.cc 2080 2010-03-23 19:18:33Z lww $
 */
 
 /// \file tools.cc
@@ -356,10 +356,10 @@ static const char *hex = "0123456789ABCDEF";
 
 String url_escape(String str)
 {
-    char *data = str.c_str();
+    const char *data = str.c_str();
     int len = str.length();
     Ref<StringBuffer> buf(new StringBuffer(len));
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; ++i)
     {
         unsigned char c = (unsigned char)data[i];
         if ((c >= '0' && c <= '9') ||
