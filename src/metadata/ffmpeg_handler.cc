@@ -87,78 +87,80 @@ FfmpegHandler::FfmpegHandler() : MetadataHandler()
 static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext *pFormatCtx) 
 {
 
-	Ref<StringConverter> sc = StringConverter::m2i();
-    
-	/* Tabs are 4 characters here */
-	typedef struct {const char *avname; metadata_fields_t field;} mapping_t;
-	static const mapping_t mapping[] =
-	{
-		{"title",   M_TITLE},
-		{"artist",  M_ARTIST},
-		{"album",   M_ALBUM},
-		{"date",    M_DATE},
-		{"genre",   M_GENRE},
-		{"comment", M_DESCRIPTION},
-		{"track",   M_TRACKNUMBER},
-		{NULL,      M_MAX},
-	};
+    Ref<StringConverter> sc = StringConverter::m2i();
 
-	if (!pFormatCtx->metadata)
-		return;
-	for (const mapping_t *m = mapping; m->avname != NULL; m++)
-	{
-		AVMetadataTag *tag = NULL;
-		tag = av_metadata_get(pFormatCtx->metadata, m->avname, NULL, 0);
-		if (tag && tag->value && tag->value[0])
-		{
-			log_debug("Added metadata %s: %s\n", m->avname, tag->value);
-			item->setMetadata(MT_KEYS[m->field].upnp, sc->convert(tag->value));
-		}
-	}
-	/* Old algorithm (doesn't work with libav >= 0.7)
-	if (strlen(pFormatCtx->title) > 0) 
+    typedef struct {const char *avname; metadata_fields_t field;} mapping_t;
+    static const mapping_t mapping[] =
     {
-	    log_debug("Added metadata title: %s\n", pFormatCtx->title);
+        {"title",   M_TITLE},
+        {"artist",  M_ARTIST},
+        {"album",   M_ALBUM},
+        {"date",    M_DATE},
+        {"genre",   M_GENRE},
+        {"comment", M_DESCRIPTION},
+        {"track",   M_TRACKNUMBER},
+        {NULL,      M_MAX},
+    };
+
+    if (!pFormatCtx->metadata)
+    {
+        return;
+    }
+
+    for (const mapping_t *m = mapping; m->avname != NULL; m++)
+    {
+        AVDictionaryEntry *tag = NULL;
+        tag = av_dict_get(pFormatCtx->metadata, m->avname, NULL, 0);
+        if (tag && tag->value && tag->value[0])
+        {
+            log_debug("Added metadata %s: %s\n", m->avname, tag->value);
+            item->setMetadata(MT_KEYS[m->field].upnp, sc->convert(tag->value));
+        }
+    }
+    /* Old algorithm (doesn't work with libav >= 0.7)
+    if (strlen(pFormatCtx->title) > 0) 
+    {
+        log_debug("Added metadata title: %s\n", pFormatCtx->title);
         item->setMetadata(MT_KEYS[M_TITLE].upnp, 
                           sc->convert(pFormatCtx->title));
-	}
-	if (strlen(pFormatCtx->author) > 0) 
+    }
+    if (strlen(pFormatCtx->author) > 0) 
     {
-	    log_debug("Added metadata author: %s\n", pFormatCtx->author);
+        log_debug("Added metadata author: %s\n", pFormatCtx->author);
         item->setMetadata(MT_KEYS[M_ARTIST].upnp, 
                           sc->convert(pFormatCtx->author));
-	}
-	if (strlen(pFormatCtx->album) > 0) 
+    }
+    if (strlen(pFormatCtx->album) > 0) 
     {
-	    log_debug("Added metadata album: %s\n", pFormatCtx->album);
+        log_debug("Added metadata album: %s\n", pFormatCtx->album);
         item->setMetadata(MT_KEYS[M_ALBUM].upnp, 
                           sc->convert(pFormatCtx->album));
-	}
-	if (pFormatCtx->year > 0) 
+    }
+    if (pFormatCtx->year > 0) 
     {
-	    log_debug("Added metadata year: %d\n", pFormatCtx->year);
+        log_debug("Added metadata year: %d\n", pFormatCtx->year);
         item->setMetadata(MT_KEYS[M_DATE].upnp, 
                           sc->convert(String::from(pFormatCtx->year)));
-	}
-	if (strlen(pFormatCtx->genre) > 0) 
+    }
+    if (strlen(pFormatCtx->genre) > 0) 
     {
-	    log_debug("Added metadata genre: %s\n", pFormatCtx->genre);
+        log_debug("Added metadata genre: %s\n", pFormatCtx->genre);
         item->setMetadata(MT_KEYS[M_GENRE].upnp, 
                           sc->convert(pFormatCtx->genre));
-	}
-	if (strlen(pFormatCtx->comment) > 0) 
+    }
+    if (strlen(pFormatCtx->comment) > 0) 
     {
-	    log_debug("Added metadata comment: %s\n", pFormatCtx->comment);
+        log_debug("Added metadata comment: %s\n", pFormatCtx->comment);
         item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, 
                           sc->convert(pFormatCtx->comment));
-	}
-	if (pFormatCtx->track > 0) 
+    }
+    if (pFormatCtx->track > 0) 
     {
-	    log_debug("Added metadata track: %d\n", pFormatCtx->track);
+        log_debug("Added metadata track: %d\n", pFormatCtx->track);
         item->setMetadata(MT_KEYS[M_TRACKNUMBER].upnp, 
                           sc->convert(String::from(pFormatCtx->track)));
-	}
-	*/
+    }
+    */
 }
 
 // ffmpeg library calls
@@ -177,22 +179,22 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
     *x = 0;
     *y = 0;
 
-	// duration
+    // duration
     secs = pFormatCtx->duration / AV_TIME_BASE;
     us = pFormatCtx->duration % AV_TIME_BASE;
     mins = secs / 60;
     secs %= 60;
     hours = mins / 60;
     mins %= 60;
-    if ((hours + mins + secs) > 0) 
-    { 
-    	sprintf(duration, "%02d:%02d:%02d.%01d", hours, mins,
+    if ((hours + mins + secs) > 0)
+    {
+        sprintf(duration, "%02d:%02d:%02d.%01d", hours, mins,
                 secs, (10 * us) / AV_TIME_BASE);
         log_debug("Added duration: %s\n", duration);
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), duration);
     }
 
-	// bitrate
+    // bitrate
     if (pFormatCtx->bit_rate > 0)  
     {
         // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
@@ -202,13 +204,13 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), String::from(pFormatCtx->bit_rate/8));
     }
 
-	// video resolution, audio sampling rate, nr of audio channels
-	audioset = false;
-	videoset = false;
-	for(i=0; i<pFormatCtx->nb_streams; i++) 
+    // video resolution, audio sampling rate, nr of audio channels
+    audioset = false;
+    videoset = false;
+    for(i=0; i<pFormatCtx->nb_streams; ++i)
     {
-		AVStream *st = pFormatCtx->streams[i];
-		if((st != NULL) && (videoset == false) && (st->codec->codec_type == AVMEDIA_TYPE_VIDEO))
+        AVStream *st = pFormatCtx->streams[i];
+        if((st != NULL) && (videoset == false) && (st->codec->codec_type == AVMEDIA_TYPE_VIDEO))
         {
             if (st->codec->codec_tag > 0)
             {
@@ -227,37 +229,37 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
                                                     fcc);
             }
 
-			if ((st->codec->width > 0) && (st->codec->height > 0)) 
+            if ((st->codec->width > 0) && (st->codec->height > 0))
             {
                 resolution = String::from(st->codec->width) + "x" + 
                                     String::from(st->codec->height);
 
-				log_debug("Added resolution: %s pixel\n", resolution.c_str());
-		        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
-				videoset = true;
+                log_debug("Added resolution: %s pixel\n", resolution.c_str());
+                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
+                videoset = true;
                 *x = st->codec->width;
                 *y = st->codec->height;
-			}
-		}
-		if((st != NULL) && (audioset == false) && (st->codec->codec_type == AVMEDIA_TYPE_AUDIO))
+            }
+        }
+        if((st != NULL) && (audioset == false) && (st->codec->codec_type == AVMEDIA_TYPE_AUDIO))
         {
-			// find the first stream that has a valid sample rate
-			if (st->codec->sample_rate > 0)
+            // find the first stream that has a valid sample rate
+            if (st->codec->sample_rate > 0)
             {
-				samplefreq = st->codec->sample_rate;
-	    	    log_debug("Added sample frequency: %d Hz\n", samplefreq);
-	        	item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
-				audioset = true;
+                samplefreq = st->codec->sample_rate;
+                log_debug("Added sample frequency: %d Hz\n", samplefreq);
+                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
+                audioset = true;
 
-				audioch = st->codec->channels;
-			    if (audioch > 0) 
-			    {
-			        log_debug("Added number of audio channels: %d\n", audioch);
-			        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(audioch));
-			    }
-			}
-		}
-	}
+                audioch = st->codec->channels;
+                if (audioch > 0) 
+                {
+                    log_debug("Added number of audio channels: %d\n", audioch);
+                    item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(audioch));
+                }
+            }
+        }
+    }
 
 } // addFfmpegResourceFields
 
@@ -268,7 +270,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext *pFormatC
 // Stub for suppressing ffmpeg error messages during matadata extraction
 void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
 {
-	// do nothing
+    // do nothing
 }
 
 void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
@@ -278,32 +280,32 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     int x = 0;
     int y = 0;
 
-	AVFormatContext *pFormatCtx;
-	
-	// Suppress all log messages
-	av_log_set_callback(FfmpegNoOutputStub);
-	
-	// Register all formats and codecs
+    AVFormatContext *pFormatCtx;
+
+    // Suppress all log messages
+    av_log_set_callback(FfmpegNoOutputStub);
+
+    // Register all formats and codecs
     av_register_all();
 
     // Open video file
-    if (av_open_input_file(&pFormatCtx, 
-                          item->getLocation().c_str(), NULL, 0, NULL) != 0)
+    if (avformat_open_input(&pFormatCtx, 
+                          item->getLocation().c_str(), NULL, NULL) != 0)
         return; // Couldn't open file
 
     // Retrieve stream information
-    if (av_find_stream_info(pFormatCtx) < 0)
+    if (avformat_find_stream_info(pFormatCtx, NULL) < 0)
     {
-        av_close_input_file(pFormatCtx);
+        avformat_close_input(&pFormatCtx);
         return; // Couldn't find stream information
-    }   
-	// Add metadata using ffmpeg library calls
-	addFfmpegMetadataFields(item, pFormatCtx);
-	// Add resources using ffmpeg library calls
-	addFfmpegResourceFields(item, pFormatCtx, &x, &y);
-	
+    }
+    // Add metadata using ffmpeg library calls
+    addFfmpegMetadataFields(item, pFormatCtx);
+    // Add resources using ffmpeg library calls
+    addFfmpegResourceFields(item, pFormatCtx, &x, &y);
+
     // Close the video file
-    av_close_input_file(pFormatCtx);
+    avformat_close_input(&pFormatCtx);
 }
 
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t *data_size)
@@ -324,12 +326,16 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t 
 #endif // old api
 
 
-    th->seek_percentage        = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+    th->seek_percentage = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
     if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
+    {
         th->overlay_film_strip = 1;
+    }
     else
+    {
         th->overlay_film_strip = 0;
+    }
 
     th->thumbnail_size = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
     th->thumbnail_image_quality = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
@@ -373,4 +379,6 @@ String FfmpegHandler::getMimeType()
     
     return thumb_mimetype;
 }
+
+
 #endif // HAVE_FFMPEG
