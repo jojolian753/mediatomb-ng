@@ -1,17 +1,11 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN"
-     "http://www.w3.org/TR/html4/frameset.dtd">
-<!--*MT*
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--*MT_J*
     
     MediaTomb - http://www.mediatomb.cc/
     
     index.html - this file is part of MediaTomb.
     
-    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
-                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
-    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
-                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
-                            Leonhard Wimmer <leo@mediatomb.cc>
+    Copyright (C) 2007-2008 Jan Habermann <jan.habermann@gmail.com>
     
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -28,172 +22,105 @@
     
     $Id$
 -->
-  <html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title>MEDIATOMB</title>
-        <link rel="shortcut icon" href="/favicon.ico" type="image/ico"> 
-        <script type="text/javascript" language="JavaScript" src="/js/tools.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/icons.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/md5.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/auth.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/prototype.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/nanotree.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/tree.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/items.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/autoscan.js"></script>
-        <script type="text/javascript" language="JavaScript" src="/js/tasks.js"></script>
-        <script type="text/javascript" language="JavaScript">
-            <!--
-            var SID;      // session id
-            var TYPE;     // database or filesystem
-            var ACCOUNTS; // accounts enabled or disabled
-            var LOGGED_IN;// logged in?
-                          // is set by checkSID();
-            var loggedIn = false;
-            var isMSIE = /MSIE/.test(navigator.userAgent);
-            if (isMSIE)
-            {
-                var msieWarn = getCookie("MSIEwarn");
-                if (msieWarn != "ok")
-                {
-                    setCookie("MSIEwarn", "ok");
-                    alert('MediaTomb UI is very limited with Internet Explorer and some elements will be displayed incorrectly! Please see the section "Internet Explorer" in the README file.');
-                }
-            }
-            function init() {
-                Try.these
-                (
-                    function()
-                    {
-                        TYPE = getCookie("TYPE");
-                        SID = getCookie("SID");
-                        lastNodeDbWish = getCookie("lastNodeDb");
-                        lastNodeFsWish = getCookie("lastNodeFs");
-                        var cookieViewItems = getCookie("viewItems");
-                        if (cookieViewItems)
-                            viewItems = cookieViewItems;
-                    },
-                    function()
-                    {
-                        alert("getCookie-Fehler");
-                    }
-                );
-                if (TYPE!="db" && TYPE!="fs") TYPE="db";
-                
-                //if (SID && SID != null && SID != 'null')
-                getConfig();    
-                checkSID();
-                var topDocument = frames["topF"].document;
-                var rightDocument = frames["rightF"].document;
-                var leftDocument = frames["leftF"].document;
-                
-                /*
-                var logoutLinkEl = topDocument.getElementById("logout_link");
-                if (ACCOUNTS)
-                    Element.show(logoutLinkEl);
-                else
-                    Element.hide(logoutLinkEl);
-                */
-                    
-                if (!SID || SID == null || ! LOGGED_IN)
-                {
-                    Element.show(rightDocument.getElementById("loginDiv"));
-                    Element.show(leftDocument.getElementById("leftLoginDiv"));
-                }
-                else
-                {
-                    loggedIn = true;
-                    Element.show(topDocument.getElementById("topDiv"));
-                    Element.show(leftDocument.getElementById("treeDiv"));
-                    Element.show(frames["topleftF"].document.getElementById("db_fs_selector"));
-                    Element.show(topDocument.getElementById("statusDiv"));
-                    if (ACCOUNTS)
-                        Element.show(topDocument.getElementById("logout_link"));
-                }
-                var globalAjaxHandlers = {
-                    onCreate: function()
-                    {
-                        setStatus("loading");
-                    },
-                    
-                    onComplete: function()
-                    {
-                        if(Ajax.activeRequestCount < 0)
-                            Ajax.activeRequestCount = 0;
-                        if(Ajax.activeRequestCount == 0)
-                        {
-                            setStatus("idle");
-                        }
-                    },
-                    
-                    onException: function()
-                    {
-                        alert("MediaTomb cannot be reached! Please check if the server is still running.");
-                        clearPollInterval();
-                        if(Ajax.activeRequestCount < 0)
-                            Ajax.activeRequestCount = 0;
-                        if(Ajax.activeRequestCount == 0)
-                        {
-                            setStatus("idle");
-                        }
-                    }
-                };
-                if (loggedIn)
-                    initLoggedIn();
-                Ajax.Responders.register(globalAjaxHandlers);
-            }
-            
-            function initLoggedIn()
-            {
-                itemInit();
-                treeInit();
-                Element.addClassName(frames["topleftF"].document.getElementById('type_' + TYPE), 'selected');
-                
-                frames["rightF"].document.onkeypress=userActivity;
-                frames["rightF"].document.onmousedown = mouseDownHandler;
-                frames["topF"].document.onmousedown = mouseDownHandler;
-                frames["topleftF"].document.onmousedown = mouseDownHandler;
-                frames["toprightF"].document.onmousedown = mouseDownHandler;
-            }
-            
-            function setType(tmpType)
-            {
-                var topLeftDocument = frames["topleftF"].document;
-                var deselectedEl = topLeftDocument.getElementById('type_' + TYPE);
-                var selectedEl = topLeftDocument.getElementById('type_' + tmpType);
-                
-                if (deselectedEl != selectedEl)
-                {
-                    Element.removeClassName(deselectedEl, 'selected');
-                    Element.addClassName(selectedEl, 'selected');
-                }
-                //$('type_' + otherType).removeClassName('selected');
-                //$('type_' + tmpType).addClassName('selected');
-                //Element.addClassName('type_' + tmpType, 'selected');
-                //Element.removeClassName('type_' + otherType, 'selected');
-                TYPE = tmpType;
-                setCookie("TYPE", TYPE);
-                treeChangeType();
-                itemChangeType();
-                return undefined;
-            }
-            
-            //-->
-        </script>
+<html>
 
-    </head>
-    <frameset frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF" rows="112px,*" onload="init();">
-        <frame src="top.html" name="topF" frameborder="0" noresize>
-        <frameset cols="30%,*" frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF">
-            <frameset rows="40px,*"  frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF">
-                <frame src="topleft.html" name="topleftF" frameborder="0" noresize>
-                <frame src="left.html" name="leftF" frameborder="0" noresize>
-            </frameset>
-            <frameset rows="40px,*" frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF">
-                <frame src="topright.html" name="toprightF" frameborder="0" noresize>
-                <frame src="right.html" name="rightF" frameborder="0" noresize>
-            </frameset>
-        </frameset>
-    </frameset>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	
+	<title>MEDIATOMB</title>
+	
+	<link rel="shortcut icon" href="favicon.ico" type="image/ico">
+	
+	<link rel="stylesheet" type="text/css" href="js/yui/build/reset/reset-min.css">
+	
+	<link rel="stylesheet" type="text/css" href="css/ext-all.css" />
+	<link rel="stylesheet" type="text/css" href="css/xtheme-vista.css" />
+	
+	<link rel="stylesheet" type="text/css" href="css/layout.css"> 
+	<link rel="stylesheet" type="text/css" href="css/tree.css">
+	<link rel="stylesheet" type="text/css" href="css/grid.css">
+	<link rel="stylesheet" type="text/css" href="css/dialogs.css">
+	
+	<script type="text/javascript" src="js/ext/ext-base.js"></script>
+	<script type="text/javascript" src="js/ext/ext-all.js"></script>
+	
+	<script type="text/javascript" src="js/layout.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	<script type="text/javascript" src="js/tools.js"></script>
+	<script type="text/javascript" src="js/items.js"></script>
+	<script type="text/javascript" src="js/session.js"></script>
+	<script type="text/javascript" src="js/tree-xml.js"></script>
+	<script type="text/javascript" src="js/tree-fs.js"></script>
+	<script type="text/javascript" src="js/tree-db.js"></script>
+	<script type="text/javascript" src="js/grid.js"></script>
+	<script type="text/javascript" src="js/dialogs.js"></script>
+	
+	<script type="text/javascript">
+		MT.session.start();
+	</script>
+</head>
+	
+<body>
+
+	<div id ="container">
+	
+		<!-- Layout -->
+	
+		<div id="top-bar" class="x-layout-inactive-content">
+			<h1 id="mediatomb-logo"><span>Mediatomb</span></h1>
+			<div id="status-div"><span>Status</span></div>
+		</div>
+		
+		<div id="navFs" class="x-layout-inactive-content"></div>
+		<div id="navDb" class="x-layout-inactive-content"></div>
+  		<div id="content" class="x-layout-inactive-content"></div>
+		
+		<!-- Trees -->
+		
+		<div id="nav-fs" class="nav-panel x-layout-inactive-content">
+			<div id="tree-fs" class="nav-tree"></div>
+		</div>
+		
+		<div id="nav-db" class="nav-panel x-layout-inactive-content">
+			<div id="tree-db" class="nav-tree"></div>
+		</div>
+		
+		<!-- Toolbars -->
+		
+		<div id="tree-fs-toolbar-panel" class="x-layout-inactive-content">
+			<div id="tree-fs-toolbar"></div>
+		</div>
+		
+		<div id="tree-db-toolbar-panel" class="x-layout-inactive-content">
+			<div id="tree-db-toolbar"></div>
+		</div>
+		
+		<div id="grid-toolbar-panel" class="x-layout-inactive-content">
+			<div id="grid-toolbar"></div>
+		</div>
+		
+		<!-- Main -->
+		
+		<div id="main-panel" class="x-layout-inactive-content">
+			<div id="main">
+				<div id="data-grid"></div>
+			</div>
+		</div>
+
+		<!-- Dialogs -->
+		
+		<div id="dlg-editItem" style="visibility: hidden;">
+			<div class="x-dlg-hd">Edit Item</div>
+				<div class="x-dlg-bd">
+					<div id="dlg-formContainer">
+						<div id="form-editItem"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+
+</body>
+
 </html>
